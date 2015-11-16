@@ -45,7 +45,11 @@ public class RubikConfiguration {
     return configuration;
   }
   
-  @Relationship(type="LCW", direction=OUTGOING)
+  public void setConfiguration(String configuration) {
+	this.configuration = configuration;
+}
+
+@Relationship(type="LCW", direction=OUTGOING)
   public RubikConfiguration lcw = null;
   @Relationship(type = "LCCW", direction = OUTGOING)
   public RubikConfiguration lccw = null;
