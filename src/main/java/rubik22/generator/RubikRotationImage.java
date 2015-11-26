@@ -1,12 +1,12 @@
 package rubik22.generator;
 
+import rubik22.model.AbstractRubik;
 import rubik22.model.Rotation;
-import rubik22.model.Rubik;
 
 public class RubikRotationImage {
-	public final Rubik rubik;
+	public final AbstractRubik rubik;
 	public final Rotation rotation;
-	public final Rubik image;
+	public final AbstractRubik image;
 
 	private RubikRotationImage(Builder builder) {
 		this.rubik = builder.rubik;
@@ -16,11 +16,11 @@ public class RubikRotationImage {
 
 	public static class Builder {
 
-		private Rubik rubik;
+		private AbstractRubik rubik;
 		private Rotation rotation;
-		private Rubik image;
+		private AbstractRubik image;
 
-		public Builder withRubik(Rubik rubik) {
+		public Builder withRubik(AbstractRubik rubik) {
 			this.rubik = rubik;
 			return this;
 		}
@@ -30,7 +30,7 @@ public class RubikRotationImage {
 			return this;
 		}
 
-		public Builder withImage(Rubik image) {
+		public Builder withImage(AbstractRubik image) {
 			this.image = image;
 			return this;
 		}

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import redis.clients.jedis.Jedis;
-import rubik22.model.Rubik;
+import rubik22.model.AbstractRubik;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 
@@ -20,7 +20,7 @@ public class JedisWriter extends UntypedActor {
 			@SuppressWarnings("unchecked")
 			List<RubikRotationImage> rubikRotationImages = (List<RubikRotationImage>) msg;
 			List<String> responses = new ArrayList<>();
-			List<Rubik> images = new ArrayList<>();
+			List<AbstractRubik> images = new ArrayList<>();
 			
 			for (RubikRotationImage rri : rubikRotationImages) {
 				String key = MessageFormat.format("{0},{1}", rri.rubik.toString(),rri.rotation.name());

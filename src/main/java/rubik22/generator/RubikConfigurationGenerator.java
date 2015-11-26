@@ -1,7 +1,7 @@
 package rubik22.generator;
 
+import rubik22.model.AbstractRubik;
 import rubik22.model.Rotation;
-import rubik22.model.Rubik;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
@@ -13,13 +13,13 @@ public class RubikConfigurationGenerator extends UntypedActor {
 
 	@Override
 	public void preStart() throws Exception {
-		worker = getContext().actorOf(Props.create(JedisWriter.class));
+		worker = getContext().actorOf(Props.create(Neo4JWriter.class));
 	};
 
 	@Override
 	public void onReceive(Object arg0) throws Exception {
-		if (arg0 instanceof Rubik) {
-			Rubik rubik = (Rubik) arg0;
+		if (arg0 instanceof AbstractRubik) {
+			AbstractRubik rubik = (AbstractRubik) arg0;
 			ImmutableList.Builder<RubikRotationImage> builder = ImmutableList
 					.builder();
 			for (Rotation rotation : Rotation.values()) {

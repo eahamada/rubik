@@ -6,8 +6,9 @@ import java.util.List;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-import rubik22.model.Cubie;
-import rubik22.model.Rubik;
+import rubik22.model.AbstractRubik;
+import rubik3.model.Cubie;
+import rubik3.model.Rubik;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.Terminated;
@@ -21,7 +22,7 @@ public class RubikGeneratorRouter extends UntypedActor {
 
 	public final static int numberOfCores = Runtime.getRuntime()
 			.availableProcessors();
-	public final static double blockingCoefficient = 0.99;
+	public final static double blockingCoefficient = 0.9999;
 	public final static int poolSize = (int) (numberOfCores / (1 - blockingCoefficient));
 	private Router router;
 	private int i = 1;
@@ -30,7 +31,8 @@ public class RubikGeneratorRouter extends UntypedActor {
 	static {
 		JedisPoolConfig poolConfig = new JedisPoolConfig();
 		poolConfig.setMaxTotal(RubikGeneratorRouter.poolSize);
-		pool = new JedisPool(poolConfig, "192.168.1.67", 6379, 10000);
+		pool = new JedisPool(poolConfig, "192.168.1.67", 6379, poolSize+5);
+		System.out.println(poolSize);
 	}
 	{
 		List<Routee> routees = new ArrayList<Routee>();
@@ -58,13 +60,9 @@ public class RubikGeneratorRouter extends UntypedActor {
 					Props.create(RubikConfigurationGenerator.class));
 			getContext().watch(r);
 			router = router.addRoutee(new ActorRefRoutee(r));
-		} else if (msg instanceof Rubik) {
-			Rubik r = (Rubik) msg;
-
-			if (j.get(String.valueOf(r.hashCode())) == null) {
-				System.out.println(i++);
+		} else if (msg instanceof AbstractRubik) {
+			AbstractRubik r = (AbstractRubik) msg;
 				router.route(msg, getSelf());
-			}
 		} else {
 			unhandled(msg);
 		}

@@ -3,9 +3,12 @@ package rubik22.model;
 import java.text.MessageFormat;
 import java.util.Arrays;
 
-public class Rubik {
+public class Rubik implements AbstractRubik {
 	private final Cubie[] cubies;
 
+	/* (non-Javadoc)
+	 * @see rubik22.model.AbstractRubik#toString()
+	 */
 	@Override
 	public String toString() {
 		byte[] bytes = new byte[8];
@@ -15,6 +18,9 @@ public class Rubik {
 		return new String(bytes);
 	}
 
+	/* (non-Javadoc)
+	 * @see rubik22.model.AbstractRubik#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -37,8 +43,12 @@ public class Rubik {
 		return true;
 	}
 
-	public final Rubik rotate(Rotation r) {
-		Rubik result = null;
+	/* (non-Javadoc)
+	 * @see rubik22.model.AbstractRubik#rotate(rubik22.model.Rotation)
+	 */
+	@Override
+	public final AbstractRubik rotate(Rotation r) {
+		AbstractRubik result = null;
 		final Cubie a = cubies[0];
 		final Cubie b = cubies[1];
 		final Cubie c = cubies[2];
@@ -105,7 +115,7 @@ public class Rubik {
 			return this;
 		}
 
-		public Rubik build() {
+		public AbstractRubik build() {
 
 			return new Rubik(this);
 		}

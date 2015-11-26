@@ -3,11 +3,11 @@ package rubik3.model;
 import java.text.MessageFormat;
 import java.util.Arrays;
 
+import rubik22.model.AbstractRubik;
 import rubik22.model.Rotation;
 
-public class Rubik {
-	private final Cubie[] cubies;
-
+public class Rubik implements AbstractRubik {
+	public final Cubie[] cubies;
 	@Override
 	public String toString() {
 		byte[] bytes = new byte[20];
@@ -64,40 +64,40 @@ public class Rubik {
 
 		switch (rotation) {
 		case LCW:
-			result = new Builder().withCubies().build();
+			result = new Builder().withCubies(c,j,o,d,e,f,g,h,b,n,k,l,a,i,m,p,q,r,s,t).build();
 			break;
 		case LCCW:
-			result = new Builder().withCubies().build();
+			result = new Builder().withCubies(m,i,a,d,e,f,g,h,n,b,k,l,o,j,c,p,q,r,s,t).build();
 			break;
 		case RCW:
-			result = new Builder().withCubies().build();
+			result = new Builder().withCubies(a,b,c,d,q,k,e,h,i,j,r,f,m,n,o,p,s,l,g,t).build();
 			break;
 		case RCCW:
-			result = new Builder().withCubies().build();
+			result = new Builder().withCubies(a,b,c,d,g,l,s,h,i,j,f,r,m,n,o,p,e,k,q,t).build();
 			break;
 		case DCW:
-			result = new Builder().withCubies().build();
+			result = new Builder().withCubies(m,b,c,d,e,f,a,i,t,j,k,h,s,n,o,p,q,r,g,l).build();
 			break;
 		case DCCW:
-			result = new Builder().withCubies().build();
+			result = new Builder().withCubies(g,b,c,d,e,f,s,l,h,j,k,t,a,n,o,p,q,r,m,i).build();
 			break;
 		case UCW:
-			result = new Builder().withCubies().build();
+			result = new Builder().withCubies(a,b,o,j,c,f,g,h,i,p,d,l,m,n,q,k,e,r,s,t).build();
 			break;
 		case UCCW:
-			result = new Builder().withCubies().build();
+			result = new Builder().withCubies(a,b,e,k,q,f,g,h,i,d,p,l,m,n,c,j,o,r,s,t).build();
 			break;
 		case BCW:
-			result = new Builder().withCubies().build();
+			result = new Builder().withCubies(c,d,e,f,g,h,a,b,i,j,k,l,m,n,o,p,q,r,s,t).build();
 			break;
 		case BCCW:
-			result = new Builder().withCubies().build();
+			result = new Builder().withCubies(g,h,a,b,c,d,e,f,i,j,k,l,m,n,o,p,q,r,s,t).build();
 			break;
 		case FCW:
-			result = new Builder().withCubies().build();
+			result = new Builder().withCubies(a,b,c,d,e,f,g,h,i,j,k,l,s,t,m,n,o,p,q,r).build();
 			break;
 		case FCCW:
-			result = new Builder().withCubies().build();
+			result = new Builder().withCubies(a,b,c,d,e,f,g,h,i,j,k,l,o,p,q,r,s,t,m,n).build();
 			break;
 		default:
 			throw new IllegalArgumentException(MessageFormat.format(
@@ -123,6 +123,15 @@ public class Rubik {
 
 			return new Rubik(this);
 		}
+	}
+
+	public static Rubik valueOf(String string) {
+		Cubie[] c = new Cubie[20];
+		String[] split = string.split("");
+		for (int i = 0; i < split.length; i++) {
+			c[i] = Cubie.fromString(split[i]);
+		}
+		return new Builder().withCubies(c).build();
 	}
 
 }
