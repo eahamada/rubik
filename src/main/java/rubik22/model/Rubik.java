@@ -3,6 +3,8 @@ package rubik22.model;
 import java.text.MessageFormat;
 import java.util.Arrays;
 
+import rubik22.model.Cubie;
+
 public class Rubik implements AbstractRubik {
 	private final Cubie[] cubies;
 
@@ -119,6 +121,15 @@ public class Rubik implements AbstractRubik {
 
 			return new Rubik(this);
 		}
+	}
+
+	public static AbstractRubik valueOf(String s) {
+		Cubie[] c = new Cubie[8];
+		String[] split = s.split("");
+		for (int i = 0; i < split.length; i++) {
+			c[i] = Cubie.fromString(split[i]);
+		}
+		return new Builder().withCubies(c).build();
 	}
 
 }

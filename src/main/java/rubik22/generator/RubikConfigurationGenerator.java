@@ -13,7 +13,7 @@ public class RubikConfigurationGenerator extends UntypedActor {
 
 	@Override
 	public void preStart() throws Exception {
-		worker = getContext().actorOf(Props.create(Neo4JWriter.class));
+		worker = getContext().actorOf(Props.create(JedisWriter.class));
 	};
 
 	@Override

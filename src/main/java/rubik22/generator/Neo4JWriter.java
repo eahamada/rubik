@@ -40,9 +40,7 @@ public class Neo4JWriter extends UntypedActor {
 								configuration, rotation, image);
 				session.query(query, params);
 			}
-			String query = "MATCH a "
-					+ "WHERE NOT (a)-[:LCW|:LCCW|:RCW|:RCCW|:DCW|:DCCW|:UCW|:UCCW|:FCW|:FCCW|:BCW|:BCCW]->() "
-					+ "RETURN a.configuration";
+			String query = "MATCH a WHERE NOT (a)-[:LCW|:LCCW|:RCW|:RCCW|:DCW|:DCCW|:UCW|:UCCW|:FCW|:FCCW|:BCW|:BCCW]->() RETURN a.configuration limit 100";
 			@SuppressWarnings("unchecked")
 			Iterable<String> result = session.query(String.class, query,
 					Collections.EMPTY_MAP);
