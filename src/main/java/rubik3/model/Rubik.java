@@ -2,9 +2,12 @@ package rubik3.model;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.List;
 
 import rubik22.model.AbstractRubik;
 import rubik22.model.Rotation;
+
+import com.google.common.collect.ImmutableList;
 
 public class Rubik implements AbstractRubik {
 	public final Cubie[] cubies;
@@ -13,6 +16,66 @@ public class Rubik implements AbstractRubik {
 		byte[] bytes = new byte[20];
 		for (int i = 0; i < cubies.length; i++) {
 			bytes[i] = cubies[i].value;
+		}
+		return new String(bytes);
+	}
+
+	public List<String> aliases(){
+		final Cubie a = cubies[0];
+		final Cubie b = cubies[1];
+		final Cubie c = cubies[2];
+		final Cubie d = cubies[3];
+		final Cubie e = cubies[4];
+		final Cubie f = cubies[5];
+		final Cubie g = cubies[6];
+		final Cubie h = cubies[7];
+		final Cubie i = cubies[8];
+		final Cubie j = cubies[9];
+		final Cubie k = cubies[10];
+		final Cubie l = cubies[11];
+		final Cubie m = cubies[12];
+		final Cubie n = cubies[13];
+		final Cubie o = cubies[14];
+		final Cubie p = cubies[15];
+		final Cubie q = cubies[16];
+		final Cubie r = cubies[17];
+		final Cubie s = cubies[18];
+		final Cubie t = cubies[19];
+		ImmutableList.Builder<String> builder = new ImmutableList.Builder<>();
+		builder.add(toString(ImmutableList.of(c,d,e,f,g,h,a,b,j,k,l,i,o,p,q,r,s,t,m,n)));
+		builder.add(toString(ImmutableList.of(e,f,g,h,a,b,c,d,k,l,i,j,q,r,s,t,m,n,o,p)));
+		builder.add(toString(ImmutableList.of(g,h,a,b,c,d,e,f,l,i,j,k,s,t,m,n,o,p,q,r)));
+		
+		builder.add(toString(ImmutableList.of(g,f,e,k,q,r,s,l,h,d,p,t,a,b,c,j,o,n,m,i)));
+		builder.add(toString(ImmutableList.of(e,k,q,r,s,l,g,f,d,p,t,h,c,j,o,n,m,i,a,b)));
+		builder.add(toString(ImmutableList.of(q,r,s,l,g,f,e,k,p,t,h,d,o,n,m,i,a,b,c,j)));
+		builder.add(toString(ImmutableList.of(s,l,g,f,e,k,q,r,t,h,d,p,m,i,a,b,c,j,o,n)));
+		
+		builder.add(toString(ImmutableList.of(s,r,q,p,o,n,m,t,l,k,j,i,g,f,e,d,c,b,a,h)));
+		builder.add(toString(ImmutableList.of(q,p,o,n,m,t,s,r,k,j,i,l,e,d,c,b,a,h,g,f)));
+		builder.add(toString(ImmutableList.of(o,n,m,t,s,r,q,p,j,i,l,k,c,b,a,h,g,f,e,d)));
+		builder.add(toString(ImmutableList.of(m,t,s,r,q,p,o,n,i,l,k,j,a,h,g,f,e,d,c,b)));
+		
+		builder.add(toString(ImmutableList.of(m,n,o,j,c,b,a,i,t,p,d,h,s,r,q,k,e,f,g,l)));
+		builder.add(toString(ImmutableList.of(o,j,c,b,a,i,m,n,p,d,h,t,q,k,e,f,g,l,s,r)));
+		builder.add(toString(ImmutableList.of(c,b,a,i,m,n,o,j,d,h,t,p,e,f,g,l,s,r,q,k)));
+		builder.add(toString(ImmutableList.of(a,i,m,n,o,j,c,b,h,t,p,d,g,l,s,r,q,k,e,f)));
+		
+		builder.add(toString(ImmutableList.of(q,k,e,d,c,j,o,p,r,f,b,n,s,l,g,h,a,i,m,t)));
+		builder.add(toString(ImmutableList.of(e,d,c,j,o,p,q,k,f,b,n,r,g,h,a,i,m,t,s,l)));
+		builder.add(toString(ImmutableList.of(c,j,o,p,q,k,e,d,b,n,r,f,a,i,m,t,s,l,g,h)));
+		builder.add(toString(ImmutableList.of(o,p,q,k,e,d,c,j,n,r,f,b,m,t,s,l,g,h,a,i)));
+		
+		builder.add(toString(ImmutableList.of(g,l,s,t,m,i,a,h,f,r,n,b,e,k,q,p,o,j,c,d)));
+		builder.add(toString(ImmutableList.of(s,t,m,i,a,h,g,l,r,n,b,f,q,p,o,j,c,d,e,k)));
+		builder.add(toString(ImmutableList.of(m,i,a,h,g,l,s,t,n,b,f,r,o,j,c,d,e,k,q,p)));
+		builder.add(toString(ImmutableList.of(a,h,g,l,s,t,m,i,b,f,r,n,c,d,e,k,q,p,o,j)));
+		return builder.build();
+	}
+	public String toString(List<Cubie> list) {
+		byte[] bytes = new byte[20];
+		for (int i = 0; i < list.size(); i++) {
+			bytes[i] = list.get(i).value;
 		}
 		return new String(bytes);
 	}

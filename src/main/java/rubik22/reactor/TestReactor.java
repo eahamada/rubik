@@ -29,7 +29,7 @@ public class TestReactor {
     Environment.initialize();
   }
 
-  private final static String IP_REDIS = "10.69.19.77";
+  private final static String IP_REDIS = "192.168.1.67";
 
   public static void main(String[] args) throws InterruptedException {
     Dispatcher dispatcher = Environment.sharedDispatcher();
@@ -52,6 +52,9 @@ public class TestReactor {
         ImmutableList.Builder<Response<Boolean>> exists = ImmutableList.builder();
         Pipeline p = j.pipelined();
         p.set(hashcode, rubik.toString());
+        for (String string : rubik.aliases()) {
+        	p.set(String.valueOf(string.hashCode()), string);
+        }
         for (RubikRotationImage rri : images) {
           String key = MessageFormat.format("{0},{1}", rri.rubik.toString(), rri.rotation.name());
           String value = rri.image.toString();
@@ -70,7 +73,7 @@ public class TestReactor {
     };
 
     Jedis jedis = new Jedis(IP_REDIS, 6379, 1000 * 1000, 1000 * 1000);
-    jedis.configSet("timeout", "1000000");
+    jedis.configSet("timeout", "10");
     jedis.sadd("TODO", new Rubik.Builder().withCubies(Cubie.values()).build().toString());
     ScanResult<String> scanResult = jedis.sscan("TODO", "0", new ScanParams().count(1000));
     long start = System.nanoTime();

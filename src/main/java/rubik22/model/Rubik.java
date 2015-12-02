@@ -2,6 +2,7 @@ package rubik22.model;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.List;
 
 import rubik22.model.Cubie;
 
@@ -18,6 +19,10 @@ public class Rubik implements AbstractRubik {
 			bytes[i] = cubies[i].value;
 		}
 		return new String(bytes);
+	}
+	
+	public List<String> aliases(){
+		return null;
 	}
 
 	/* (non-Javadoc)
