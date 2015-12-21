@@ -1,31 +1,25 @@
 package rubik22.reactor;
 
-import java.math.BigInteger;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.reactivestreams.Processor;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
+import dk.brics.automaton.Automaton;
+import dk.brics.automaton.BasicAutomata;
 import reactor.Environment;
-import reactor.core.processor.RingBufferWorkProcessor;
-import reactor.rx.Stream;
-import reactor.rx.Streams;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.Response;
-import rubik22.model.AbstractRubik;
 import rubik22.model.Rotation;
 import rubik22.model.RubikRotationImage;
 import rubik3.model.Cubie;
 import rubik3.model.Rubik;
-
-import com.google.common.collect.ImmutableList;
-
-import dfa.DFA;
-import dfa.State;
 
 public class TestReactor {
 	static {
@@ -33,7 +27,7 @@ public class TestReactor {
 		Environment.initialize();
 	}
 
-	private final static String IP_REDIS = "192.168.1.67";
+	private final static String IP_REDIS = "10.69.19.77";
 
 	public static void main(String[] args) throws InterruptedException {
 		JedisPoolConfig poolConfig = new JedisPoolConfig();
@@ -41,47 +35,45 @@ public class TestReactor {
 		JedisPool jedisPool = new JedisPool(poolConfig, IP_REDIS);
 		Jedis j = jedisPool.getResource();
 		Jedis k = jedisPool.getResource();
-	
-		State q0 = State.valueOf("q0");
-		DFA dfa = new DFA.Builder()
-		.withQ(q0)
-		.withΣ()
-		.withδ((state, character) -> null)
-		.withQ0(q0)
-		.withF()
-		.build();
-		k.sadd("TODO", new Rubik.Builder().withCubies(Cubie.values()).build().toString());
+		String INIT = new Rubik.Builder().withCubies(Cubie.values()).build().toString();
+    k.sadd("TODO", INIT);
 		Long scard = k.scard("TODO");
+		Automaton dfa = BasicAutomata.makeString(INIT);
 		while (scard > 0) {
 			String spop = k.spop("TODO");
-			Rubik c = Rubik.valueOf(spop);
-			 List<RubikRotationImage> images = Collections.emptyList();
-		        ImmutableList.Builder<RubikRotationImage> builder = ImmutableList.builder();
-		        for (Rotation rotation : Rotation.values()) {
-		          builder.add(new RubikRotationImage.Builder().withRubik(c).withRotation(rotation)
-		              .withImage(c.rotate(rotation)).build());
-		        }
-		        images = builder.build();
-		        ImmutableList.Builder<Boolean> exists = ImmutableList.builder();
-		        dfa = dfa.forceAccept(c.toString());
-		        for (String string : c.aliases()) {
-		        	dfa = dfa.forceAccept(string);
-		        }
-		        for (RubikRotationImage rri : images) {
-		          String value = rri.image.toString();
-		          exists.add(dfa.accept(value));
-		        }
-		        List<Boolean> responses = exists.build();
-		        for (int i = 0; i < responses.size(); i++) {
-		          if(!responses.get(i)){
-		            j.sadd("TODO", images.get(i).image.toString());
-		          }
-		        }
+			dfa = m(j, dfa, spop);
+		        int numberOfTransitions = dfa.getNumberOfTransitions();
+            int numberOfStates = dfa.getNumberOfStates();
+            double density =  100 * numberOfTransitions / numberOfStates;
+            System.out.println(MessageFormat.format("{0}:{1} => {2}", numberOfStates, numberOfTransitions,density));
 			scard = k.scard("TODO");
 		}
 		k.close();
 		j.close();
 		jedisPool.close();
 	}
+
+  private static Automaton m(Jedis j, final Automaton dfa, String spop) {
+    Rubik c = Rubik.valueOf(spop);
+    Pipeline p = j.pipelined();
+     List<Automaton> collect = Arrays.asList(Rotation.values()).stream()
+       // Créer un cube image pour chaque rotation
+       .map(rotation -> 
+              new RubikRotationImage.Builder().withRubik(c).withRotation(rotation).withImage(c.rotate(rotation)).build())
+       //Filtrer ceux qui n'ont pas déjà été traités
+       .filter(rri -> 
+                 !dfa.run(rri.image.toString()))
+       //Les ajouter à TODO
+       .map(rri -> { 
+         String image = rri.image.toString();
+                  p.sadd("TODO", image);
+                  return BasicAutomata.makeString(image);
+                  
+       }).collect(Collectors.toList());
+          p.sync();
+          Builder<String> builder = new ImmutableList.Builder<String>().add(c.toString()).addAll(c.aliases());
+          String[] strings = builder.build().toArray(new String[c.aliases().size()+1]);
+          return Automaton.minimize(dfa.union(BasicAutomata.makeStringUnion(strings)).union(Automaton.union(collect)));
+  }
 
 }

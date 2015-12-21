@@ -16,6 +16,9 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
 
+import dk.brics.automaton.Automaton;
+import dk.brics.automaton.BasicAutomata;
+
 public class DfaTest {
 
   @Test
@@ -189,5 +192,14 @@ public class DfaTest {
             ;
     DFA dfaA = dfa.forceAccept("ABCD").forceAccept("DABCD").minimize().normalize();
     assertTrue(dfaA.accept("ABCD"));
+  }
+  @Test
+  public void testAutomaton() {
+    Automaton makeString = BasicAutomata.makeString("ABCD");
+    Automaton min = makeString.union(BasicAutomata.makeString("DABCD"));
+    assertTrue(min.run("DABCD"));
+    assertTrue(min.run("ABCD"));
+    min.minimize();
+    System.out.println(min.getNumberOfStates());
   }
 }

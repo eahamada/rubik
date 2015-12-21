@@ -12,11 +12,6 @@
 			<name>Spring.io RELEASE</name>
 			<url>http://repo.spring.io/libs-release</url>
 		</repository>
-		<repository>
-			<id>lhogie.i3s.maven.repo</id>
-			<name>Luc Hogie Maven repository</name>
-			<url>http://www.i3s.unice.fr/~hogie/maven_repository/</url>
-		</repository>
 	</repositories>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -30,15 +25,23 @@
 		<hamcrest.version>1.3</hamcrest.version>
 		<reactor.version>2.0.6.RELEASE</reactor.version>
 <!-- 		<rxjava.version>1.0.16</rxjava.version> -->
-		<grph.version>1.6.29</grph.version>
+		<jmh.version>1.11.2</jmh.version>
+		<automaton.version>1.11-8</automaton.version>
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>grph</groupId>
-			<artifactId>grph</artifactId>
-			<version>${grph.version}</version>
-		</dependency>
+	<dependency>
+	<groupId>org.openjdk.jmh</groupId>
+	<artifactId>jmh-core</artifactId>
+	<version>${jmh.version}</version>
+</dependency>
+<dependency>
+	<groupId>dk.brics.automaton</groupId>
+	<artifactId>automaton</artifactId>
+	<version>${automaton.version}</version>
+</dependency>
+
+	
 <!-- 		<dependency> -->
 <!-- 			<groupId>io.reactivex</groupId> -->
 <!-- 			<artifactId>rxjava</artifactId> -->
