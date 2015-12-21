@@ -2,7 +2,10 @@ package rubik22.model;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+
+import com.google.common.collect.ImmutableList;
 
 import rubik22.model.Cubie;
 
@@ -22,7 +25,9 @@ public class Rubik implements AbstractRubik {
 	}
 	
 	public List<String> aliases(){
-		return null;
+		ImmutableList.Builder<String> builder = ImmutableList.builder();
+		
+		return builder.build();
 	}
 
 	/* (non-Javadoc)

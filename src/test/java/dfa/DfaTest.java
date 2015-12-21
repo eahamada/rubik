@@ -1,23 +1,28 @@
 package dfa;
 
 import static dfa.DFA.PATTERN;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
+import java.text.MessageFormat;
 import java.util.Map;
 import java.util.function.BiFunction;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
+
+
+
 import com.google.common.collect.ImmutableMap;
 
 public class DfaTest {
 
   @Test
-  @Ignore
-	public void test() {
-	  State q0 = new State.Builder().withId("q0").build();
-		State q1 = new State.Builder().withId("q1").build();
-		State q2 = new State.Builder().withId("q2").build();
+	public void testShouldAcceptDivisibleByThree() {
+	  State q0 = State.valueOf("q0");
+		State q1 = State.valueOf("q1");
+		State q2 = State.valueOf("q2");
 
 		BiFunction<State, Character, State> δ =
 		    (s, c) -> {
@@ -64,25 +69,25 @@ public class DfaTest {
         .build();
 		    return map.get(PATTERN.apply(s,c));
 		};
-		DFA d = new DFA.Builder()
+		DFA dfa = new DFA.Builder()
 						.withQ(q0, q1, q2)
 						.withΣ('0', '1', '2','3','4','5','6','7','8','9')
 						.withδ(δ)
 						.withQ0(q0)
 						.withF(q0)
-						.build();
-		d.prettyPrint();
+						.build()
+						.minimize();
+		assertTrue(dfa.accept("012345678912345678912345678912345679801234567891234567891234567891234567980123456789123456789123456789123456798012345678912345678912345678912345679801234567891234567891234567891234567980123456789123456789123456789123456798012345678912345678912345678912345679801234567891234567891234567891234567980123456789123456789123456789123456798"));
+		assertFalse(dfa.accept("012345678912345678912345678912345679012345678912345678912345678912345679801234567891234567891234567891234567980123456789123456789123456789123456798012345678912345678912345678912345679801234567891234567891234567891234567980123456789123456789123456789123456798012345678912345678912345678912345679801234567891234567891234567891234567980123456789123456789123456789123456798"));
 	}
   @Test
-  public void testMin() {
-    State a = new State.Builder().withId("a").build();
-    State b = new State.Builder().withId("b").build();
-    State c = new State.Builder().withId("c").build();
-    State d = new State.Builder().withId("d").build();
-    State e = new State.Builder().withId("e").build();
-    State f = new State.Builder().withId("f").build();
-    
-
+  public void testMinimize() {
+    State a = State.valueOf("a");
+    State b = State.valueOf("b");
+    State c = State.valueOf("c");
+    State d = State.valueOf("d");
+    State e = State.valueOf("e");
+    State f = State.valueOf("f");
     BiFunction<State, Character, State> δ =
         (state, character) -> {
         ImmutableMap.Builder<String, State> builder = ImmutableMap.builder();
@@ -111,7 +116,78 @@ public class DfaTest {
             .build()
             .minimize()
             ;
-    dfa.prettyPrint();
+    assertTrue(dfa.Q.size() == 3);
+    assertTrue(dfa.Σ.size() == 2);
+    assertTrue(dfa.F.size() == 1);
   }
+  @Test
+  public void testRemoveUnreachableStates() {
+    State s0 = State.valueOf("0");
+    State s1 = State.valueOf("1");
+    State s2 = State.valueOf("2");
+    
 
+    BiFunction<State, Character, State> δ =
+        (state, character) -> {
+        ImmutableMap.Builder<String, State> builder = ImmutableMap.builder();
+        Map<String, State> map = builder
+        .put(PATTERN.apply(s0,'0'), s1)
+        .put(PATTERN.apply(s0,'1'), s0)
+        .put(PATTERN.apply(s1,'0'), s1)
+        .put(PATTERN.apply(s1,'1'), s0)
+        .put(PATTERN.apply(s2,'0'), s1)
+        .put(PATTERN.apply(s2,'1'), s0)
+        .build();
+    return map.get(PATTERN.apply(state,character));
+        };
+    DFA dfa = new DFA.Builder()
+            .withQ(s0,s1,s2)
+            .withΣ('0', '1')
+            .withδ(δ)
+            .withQ0(s0)
+            .withF(s1)
+            .build()
+            .removeUnreachableStates()
+            ;
+    assertTrue(dfa.Q.size() == 2);
+  }
+  @Test
+  public void testForceAcceptChar() {
+    State s0 = State.valueOf("0");
+    BiFunction<State, Character, State> δ =
+        (state, character) -> null;
+    DFA dfa = new DFA.Builder()
+            .withQ(s0)
+            .withΣ()
+            .withδ(δ)
+            .withQ0(s0)
+            .withF()
+            .build()
+            .removeUnreachableStates()
+            .normalize()
+            ;
+    assertFalse(dfa.accept("A"));
+    assertFalse(dfa.accept("B"));
+    DFA forceAccept = dfa.forceAccept(dfa.q0,'A');
+    assertTrue(forceAccept.accept("A"));
+    assertFalse(forceAccept.accept("B"));
+  }
+  @Test
+  public void testForceAcceptString() {
+    State s0 = State.valueOf("q0");
+    BiFunction<State, Character, State> δ =
+        (state, character) -> null;
+    DFA dfa = new DFA.Builder()
+            .withQ(s0)
+            .withΣ()
+            .withδ(δ)
+            .withQ0(s0)
+            .withF()
+            .build()
+            .removeUnreachableStates()
+            .normalize()
+            ;
+    DFA dfaA = dfa.forceAccept("ABCD").forceAccept("DABCD").minimize().normalize();
+    assertTrue(dfaA.accept("ABCD"));
+  }
 }

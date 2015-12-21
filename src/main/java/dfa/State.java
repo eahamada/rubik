@@ -1,23 +1,29 @@
 package dfa;
 
+import java.util.concurrent.ExecutionException;
+
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
 public class State {
 	public final String id;
-
-	private State(Builder builder) {
-	  this.id = builder.id;
+	private final static LoadingCache<String, State> STATES = CacheBuilder.newBuilder()
+		       .maximumSize(1000)
+		       .build(
+		           new CacheLoader<String, State>() {
+		             public State load(String key) {
+		               return new State(key);
+		             }
+		           });
+	private State(String id) {
+	  this.id = id;
 	}
-
-	public static class Builder{
-
-		private String id;
-
-		public Builder withId(String id) {
-		  this.id = id;
-		  return this;
-		}
-
-		public State build() {
-		  return new State(this);
+	public static State valueOf(String id){
+		try {
+			return STATES.get(id);
+		} catch (ExecutionException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -45,6 +51,13 @@ public class State {
       return false;
     return true;
   }
+@Override
+public String toString() {
+	return "State [id=" + id + "]";
+}
+public static State valueOf(int i) {
+	return valueOf(String.valueOf(i));
+}
 
 	
 }

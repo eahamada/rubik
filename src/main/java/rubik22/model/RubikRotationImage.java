@@ -1,7 +1,5 @@
-package rubik22.generator;
+package rubik22.model;
 
-import rubik22.model.AbstractRubik;
-import rubik22.model.Rotation;
 
 public class RubikRotationImage {
 	public final AbstractRubik rubik;

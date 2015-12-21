@@ -1,9 +1,9 @@
 package rubik22.reactor;
 
+import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.reactivestreams.Processor;
 
@@ -16,13 +16,16 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
-import rubik22.generator.RubikRotationImage;
 import rubik22.model.AbstractRubik;
 import rubik22.model.Rotation;
+import rubik22.model.RubikRotationImage;
 import rubik3.model.Cubie;
 import rubik3.model.Rubik;
 
 import com.google.common.collect.ImmutableList;
+
+import dfa.DFA;
+import dfa.State;
 
 public class TestReactor {
 	static {
@@ -38,13 +41,20 @@ public class TestReactor {
 		JedisPool jedisPool = new JedisPool(poolConfig, IP_REDIS);
 		Jedis j = jedisPool.getResource();
 		Jedis k = jedisPool.getResource();
-		Processor<String, String> p = RingBufferWorkProcessor.create();
-		Stream<String> s = Streams.wrap(p);
-
-		Processor<AbstractRubik, AbstractRubik> q = RingBufferWorkProcessor
-				.create();
-		Stream<AbstractRubik> t = Streams.wrap(q);
-		s.map(Rubik::valueOf).consume(c -> {
+	
+		State q0 = State.valueOf("q0");
+		DFA dfa = new DFA.Builder()
+		.withQ(q0)
+		.withΣ()
+		.withδ((state, character) -> null)
+		.withQ0(q0)
+		.withF()
+		.build();
+		k.sadd("TODO", new Rubik.Builder().withCubies(Cubie.values()).build().toString());
+		Long scard = k.scard("TODO");
+		while (scard > 0) {
+			String spop = k.spop("TODO");
+			Rubik c = Rubik.valueOf(spop);
 			 List<RubikRotationImage> images = Collections.emptyList();
 		        ImmutableList.Builder<RubikRotationImage> builder = ImmutableList.builder();
 		        for (Rotation rotation : Rotation.values()) {
@@ -52,37 +62,26 @@ public class TestReactor {
 		              .withImage(c.rotate(rotation)).build());
 		        }
 		        images = builder.build();
-		        String hashcode = String.valueOf(c.hashCode());
-		        ImmutableList.Builder<Response<Boolean>> exists = ImmutableList.builder();
-		        Pipeline pipelined = j.pipelined();
-		        pipelined.set(hashcode, c.toString());
+		        ImmutableList.Builder<Boolean> exists = ImmutableList.builder();
+		        dfa = dfa.forceAccept(c.toString());
 		        for (String string : c.aliases()) {
-		        	pipelined.set(String.valueOf(string.hashCode()), string);
+		        	dfa = dfa.forceAccept(string);
 		        }
 		        for (RubikRotationImage rri : images) {
-		          String key = MessageFormat.format("{0},{1}", rri.rubik.toString(), rri.rotation.name());
 		          String value = rri.image.toString();
-		          String imageHash = String.valueOf(rri.image.hashCode());
-		          pipelined.set(key, value);
-		          exists.add(pipelined.exists(imageHash));
+		          exists.add(dfa.accept(value));
 		        }
-		        pipelined.sync();
-		        List<Response<Boolean>> responses = exists.build();
+		        List<Boolean> responses = exists.build();
 		        for (int i = 0; i < responses.size(); i++) {
-		          if(!responses.get(i).get()){
+		          if(!responses.get(i)){
 		            j.sadd("TODO", images.get(i).image.toString());
 		          }
 		        }
-		});
-		k.sadd("TODO", new Rubik.Builder().withCubies(Cubie.values()).build().toString());
-		Long scard = k.scard("TODO");
-		while (scard > 0) {
-			String spop = k.spop("TODO");
-			p.onNext(spop);
 			scard = k.scard("TODO");
 		}
 		k.close();
 		j.close();
+		jedisPool.close();
 	}
 
 }
